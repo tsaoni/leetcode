@@ -115,6 +115,9 @@ class Solution:
                 return k
         return -1
 
+    def beautifulNumbers(self, l: int, r: int) -> int:
+        
+        return 
 
 
 if __name__ == "__main__": 
@@ -129,8 +132,15 @@ if __name__ == "__main__":
     # ret = Solution().solveQueries(*test_case)
     # print(ret)
 
-    nums = [2,0,2]
-    queries = [[0,2,1],[0,2,1],[1,1,3]]
-    test_case = (nums, queries)
-    ret = Solution().minZeroArray(*test_case)
+    # nums = [2,0,2]
+    # queries = [[0,2,1],[0,2,1],[1,1,3]]
+    # test_case = (nums, queries)
+    # ret = Solution().minZeroArray(*test_case)
+    # print(ret)
+
+
+    l = 10
+    r = 20
+    test_case = (l, r)
+    ret = Solution().beautifulNumbers(*test_case)
     print(ret)

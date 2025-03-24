@@ -1,2 +1,3 @@
 # leetcode
-My implement code in leedcode
+My implementation in leetcode
+;)
