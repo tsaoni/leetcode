@@ -1,6 +1,8 @@
 import time
 from typing import List
 from collections import defaultdict
+import numpy as np
+import math
 
 class Solution: 
     def func(): 
@@ -88,12 +90,29 @@ class Solution:
         return timeline[-1]
 
     def minOperations(self, queries: List[List[int]]) -> int:
-        def count(): 
-            
-            return 
+        emax = 15 
+        nums = []
+        for i in range(emax): 
+            x = i + 1 
+            n = 4 ** (i + 1) - 4 ** i 
+            nums += [x * n]
+
+        def count(num): 
+            if num == 0: 
+                return 0
+            e = math.floor(math.log(num) / math.log(4)) #.astype(int)
+            # print("e", e)
+            tmp = (num - 4 ** e + 1) * (e + 1) + sum(nums[: e])
+            # print("tmp", tmp)
+            # ret = math.ceil(tmp / 2) #.astype(int)
+            # print("ret", ret)
+            return tmp
+        
         ret = 0
         for l, r in queries: 
-            ret += count(r) - count(l)
+            q = count(r) - count(l - 1)
+            # print("q", q)
+            ret += math.ceil(q / 2)
         return ret
 
 if __name__ == "__main__": 
@@ -122,6 +141,9 @@ if __name__ == "__main__":
 
     # ret = Solution().minTime(*test_case)
     
-
+    queries = [[1,2],[2,4]]
+    # queries = [[2,6]]
+    # queries = [[14,18]]
+    test_case = (queries, )
     ret = Solution().minOperations(*test_case)
     print(ret)
