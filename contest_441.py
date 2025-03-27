@@ -1,4 +1,6 @@
 from typing import List
+import functools
+import time
 
 class Solution: 
     def func(): 
@@ -115,9 +117,167 @@ class Solution:
                 return k
         return -1
 
-    def beautifulNumbers(self, l: int, r: int) -> int:
+    def beautifulNumbers2(self, l: int, r: int) -> int:
+        start_time = time.time()
+        def get_digits(num): 
+            d = []
+            while num > 0: 
+                d = [num % 10] + d
+                num = num // 10 
+            
+            return [0] * (9 - len(d)) + d
+        dl = get_digits(l - 1)
+        dr = get_digits(r)
+        # print(dl, dr)
         
-        return 
+        @functools.lru_cache(None)
+        def count(cnt, leadzero, num, mult, sumt, tight): 
+            ub = get_digits(num)
+            if cnt == 9:    
+                # print(cur)
+                if leadzero: 
+                    return 0
+                return 0 if mult % sumt > 0 else 1
+            ret = 0
+            if tight: #(len(cur) == 0 and cnt > 0 and ub[cnt - 1] > 0 or len(cur) > 0 and cur[-1] < ub[cnt - 1]): 
+                maxd = ub[cnt] + 1
+            else: maxd = 10
+            for i in range(0, maxd): 
+                n_mult = 1
+                # a = False
+                if i == 0 and not leadzero and not tight: 
+                    # a = True
+                    ret += 10 ** (8 - cnt)
+                    continue
+                # if i == 0 and leadzero: # leading zero check
+                #     pass
+                # else: 
+                #     cur += [i]
+                
+                if i == 0 and leadzero: 
+                    n_mult = mult
+                else: 
+                    n_mult = mult * i
+                n_sumt = sumt + i
+                n_leadzero = leadzero and (i == 0)
+                n_tight = tight and (i == maxd - 1)
+                ret += count(cnt + 1, n_leadzero, num, n_mult, n_sumt, n_tight)
+                # if a: 
+                #     if ret != 10 ** (8 - cnt): 
+                #         import pdb 
+                #         pdb.set_trace()
+                #         print(10 ** (8 - cnt))
+                #         print(ret)
+                #         print()
+            return ret
+
+        rr = count(0, True, r, 1, 0, True) 
+        # print()
+        lr = count(0, True, l - 1, 1, 0, True)
+        # print(rr, lr)
+        # print("time: ", time.time() - start_time)
+        return rr - lr
+
+    def beautifulNumbers1(self, l: int, r: int) -> int:
+        start_time = time.time()
+        @functools.lru_cache(None)
+        def dp(
+            s: str,
+            i: int,
+            tight: bool,
+            isLeadingZero: bool,
+            hasZero: bool,
+            sum: int,
+            prod: int,
+        ) -> int:
+            if i == len(s):
+                if isLeadingZero:
+                    return 0
+                return 1 if hasZero or prod % sum == 0 else 0
+            if not isLeadingZero and hasZero and not tight:
+                return 10 ** (len(s) - i)
+
+            res = 0
+            maxDigit = int(s[i]) if tight else 9
+
+            for d in range(maxDigit + 1):
+                nextTight = tight and (d == maxDigit)
+                nextIsLeadingZero = isLeadingZero and d == 0
+                nextHasZero = not nextIsLeadingZero and d == 0
+                nextProd = 1 if nextIsLeadingZero else prod * d
+                res += dp(s, i + 1, nextTight, nextIsLeadingZero,
+                        nextHasZero, sum + d, nextProd)
+
+            return res
+
+        ret = (dp(str(r), 0, tight=True, isLeadingZero=True, hasZero=False, sum=0, prod=1) -
+                dp(str(l - 1), 0, tight=True, isLeadingZero=True, hasZero=False, sum=0, prod=1))
+        
+        print("time: ", time.time() - start_time)
+        return ret
+
+    def beautifulNumbers(self, l: int, r: int) -> int:
+        start_time = time.time()
+        def get_digits(num): 
+            d = []
+            while num > 0: 
+                d = [num % 10] + d
+                num = num // 10 
+            
+            return [0] * (9 - len(d)) + d
+        dl = get_digits(l - 1)
+        dr = get_digits(r)
+        # print(dl, dr)
+        
+        # @functools.lru_cache(None)
+        def count(cnt, cur, ub, mult, sumt, tight): 
+            if cnt == 9:    
+                # print(cur)
+                if len(cur) == 0: 
+                    return 0
+                return 0 if mult % sumt > 0 else 1
+            ret = 0
+            if tight: #(len(cur) == 0 and cnt > 0 and ub[cnt - 1] > 0 or len(cur) > 0 and cur[-1] < ub[cnt - 1]): 
+                maxd = ub[cnt] + 1
+            else: maxd = 10
+            for i in range(0, maxd): 
+                n_mult = 1
+                # a = False
+                if i == 0 and len(cur) > 0 and not tight: 
+                    # a = True
+                    ret += 10 ** (8 - cnt)
+                    continue
+                if i == 0 and len(cur) == 0: # leading zero check
+                    pass
+                    # tmp = cur + []
+                else: 
+                    cur += [i]
+                    # tmp = cur + [i]
+                
+                if i == 0 and len(cur) == 0: 
+                    n_mult = mult
+                else: 
+                    n_mult = mult * i
+                n_sumt = sumt + i
+                n_tight = tight and (i == maxd - 1)
+                ret += count(cnt + 1, cur, ub, n_mult, n_sumt, n_tight)
+                if not(i == 0 and len(cur) == 0):
+                    cur.pop(-1)
+                # if a: 
+                #     if ret != 10 ** (8 - cnt): 
+                #         import pdb 
+                #         pdb.set_trace()
+                #         print(10 ** (8 - cnt))
+                #         print(ret)
+                #         print()
+            return ret
+
+        rr = count(0, [], dr, 1, 0, True) 
+        # print()
+        lr = count(0, [], dl, 1, 0, True)
+        # print(rr, lr)
+        print("time: ", time.time() - start_time)
+        return rr - lr
 
 
 if __name__ == "__main__": 
@@ -141,6 +301,16 @@ if __name__ == "__main__":
 
     l = 10
     r = 20
+    # l = 1
+    # r = 15
+    # l = 776 
+    # r = 776
+    # l = 629 
+    # r = 708
+    # l = 5940 
+    # r = 79658243
+
     test_case = (l, r)
-    ret = Solution().beautifulNumbers(*test_case)
+
+    ret = Solution().beautifulNumbers2(*test_case)
     print(ret)
