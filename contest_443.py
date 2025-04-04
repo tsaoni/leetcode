@@ -221,6 +221,8 @@ class Solution:
         print("slp: ", slp, " tlp: ", tlp, " lcs: ", lcs)
         return max(len(slp), len(tlp), len(lcs))
 
+
+
 if __name__ == "__main__": 
     # cost = [5,3,4,1,3,2]
     # cost = [1,2,4,6,7]

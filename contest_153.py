@@ -210,6 +210,10 @@ class Solution:
         # print(pivot)
         return ret
 
+    def maxActiveSectionsAfterTrade(self, s: str, queries: List[List[int]]) -> List[int]:
+        
+        return 
+
 if __name__ == "__main__": 
     # s = "01"
     # s = "0100"
@@ -220,15 +224,18 @@ if __name__ == "__main__":
     # test_case = (s, )
     # ret = Solution().maxActiveSectionsAfterTrade(*test_case)
     
-    nums = [3,1,4]
-    cost = [4,6,6]
-    k = 1
+    # nums = [3,1,4]
+    # cost = [4,6,6]
+    # k = 1
     # nums = [4,8,5,1,14,2,2,12,1]
     # cost = [7,2,8,4,2,2,1,1,2]
     # k = 7
-    nums = [5,14,42,38,48,32,26,9,35,21] 
-    cost = [8,18,5,43,28,8,29,34,17,13]
-    k = 20
-    test_case = (nums, cost, k)
-    ret = Solution().minimumCost2(*test_case)
+    # nums = [5,14,42,38,48,32,26,9,35,21] 
+    # cost = [8,18,5,43,28,8,29,34,17,13]
+    # k = 20
+    # test_case = (nums, cost, k)
+    # ret = Solution().minimumCost2(*test_case)
+    
+
+    ret = Solution().maxActiveSectionsAfterTrade()
     print(ret)
