@@ -42,3 +42,7 @@ class SegmentTree:
         val = max(self.get_max(L, R, 2 * node + 1, start, mid), 
                   self.get_max(L, R, 2 * node + 2, mid + 1, end))
         return val
+    
+class BinarySearchTree: 
+    def __init__(self): 
+        pass

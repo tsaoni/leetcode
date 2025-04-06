@@ -210,7 +210,7 @@ class Solution:
         # print(pivot)
         return ret
 
-    def maxActiveSectionsAfterTrade(self, s: str, queries: List[List[int]]) -> List[int]:
+    def maxActiveSectionsAfterTrade_2(self, s: str, queries: List[List[int]]) -> List[int]:
         
         return 
 
@@ -236,6 +236,8 @@ if __name__ == "__main__":
     # test_case = (nums, cost, k)
     # ret = Solution().minimumCost2(*test_case)
     
-
-    ret = Solution().maxActiveSectionsAfterTrade()
+    s = "01"
+    queries = [[0,1]]
+    test_case = (s, queries, )
+    ret = Solution().maxActiveSectionsAfterTrade_2(*test_case)
     print(ret)
