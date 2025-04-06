@@ -94,7 +94,7 @@ class TreeNode:
         self.cnt = 1
 
 class Router1:
-
+    """BST version (still TLE QAQ)"""
     def __init__(self, memoryLimit: int):
         self.limit = memoryLimit 
         self.memory = []
