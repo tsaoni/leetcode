@@ -1,3 +1,4 @@
+from collections import defaultdict, Counter
 
 class SubtitleCalibrator: 
     def word_level_lcs(
@@ -59,6 +60,58 @@ class SubtitleCalibrator:
                         table[i][j] += table[i][j - 1]
         
         return table[-1][-1]
+
+
+# 25.04.07
+class Node: 
+    def __init__(self, val, left, right): 
+        self.val = val 
+        self.left = left 
+        self.right = right
+
+cost = 0
+def total_cost(root): 
+    if root is None: 
+        return 0
+    return root.val + total_cost(root.left) + total_cost(root.right)
+    
+# cur.acc_val 
+def total_cost1(cur, parent, grandparent): 
+    if parent is None and grandparent is None: 
+        cur.acc_val = cur.val 
+    elif grandparent is None: 
+        cur.acc_val = max(cur.val, parent.val)
+    else: 
+        cur.acc_val = max(cur.val + grandparent.acc_val, parent.acc_val)
+
+    if cur.left is None and cur.right is None: #leaf 
+        return cur.acc_val
+
+    lval = total_cost1(cur.left, cur, parent)
+    rval = total_cost1(cur.right, cur, parent)
+    
+    return max(lval, rval)
+
+def total_cost2(cur): 
+    if cur.left is None and cur.right is None: #leaf 
+        cur.ret_val = cur.val
+        cur.not_ret_val = 0
+
+    lval = total_cost1(cur.left)
+    rval = total_cost1(cur.right)
+    
+    cur.ret_val = cur.val + cur.left.not_ret_val + cur.right.not_ret_val
+    cur.not_ret_val = max(cur.left.ret_val, cur.left.not_ret_val) + \
+        max(cur.right.ret_val, cur.right.not_ret_val)
+
+    return max(cur.ret_val, cur.not_ret_val)
+
+# 1
+
+# 10  3 
+
+# 4  5  6
+
 
 if __name__ == "__main__": 
     x1 = "he are the generative ice tea"

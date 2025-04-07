@@ -85,15 +85,68 @@ class Router:
         else: 
             return 0
 
+class Router1:
+
+    def __init__(self, memoryLimit: int):
+        self.limit = memoryLimit 
+        self.memory = []
+        self.metadata = defaultdict(list)
+        
+    def search_left(self, dest, start, end, t): 
+        if start == end: 
+            return start 
+        
+        return 
+
+    def search_right(self, dest, start, end, t): 
+        
+        return 
+
+    def addPacket(self, source: int, destination: int, timestamp: int) -> bool:
+        p = [source, destination, timestamp]
+        if p in self.memory: 
+            return False
+        self.memory.append(p)
+        self.metadata[destination].append(timestamp)
+        if len(self.memory) > self.limit: 
+            _, dest, _ = self.memory.pop(0)
+            self.metadata[dest].pop(0)
+        return True
+
+    def forwardPacket(self) -> List[int]:
+        if len(self.memory) > 0: 
+            _, dest, _ = self.memory[0]
+            self.metadata[dest].pop(0)
+            return self.memory.pop(0)
+        else:
+            return []
+
+    def getCount(self, destination: int, startTime: int, endTime: int) -> int:
+        cnt = 0
+        dest = self.metadata[destination]
+        if len(dest) == 0: 
+            return 0
+        dest = sorted(dest)
+    
+        sidx = self.search(dest, 0, len(dest) - 1, startTime, "u")
+        eidx = self.search(dest, 0, len(dest) - 1, endTime, "l")
+        # print(sidx, eidx)
+        if sidx >= 0 and eidx >= 0: 
+            return eidx - sidx + 1
+        else: 
+            return 0
+
+
 
 class TreeNode: 
-    def __init__(self, val, left, right): 
+    def __init__(self, val, left, right, ccnt=1): 
         self.val = val 
         self.left = left 
         self.right = right 
         self.cnt = 1
+        self.ccnt = ccnt
 
-class Router1:
+class Router2:
     """BST version (still TLE QAQ)"""
     def __init__(self, memoryLimit: int):
         self.limit = memoryLimit 
@@ -106,16 +159,19 @@ class Router1:
             def add(node, t): 
                 if t == node.val: 
                     node.cnt += 1 
+                    node.ccnt += 1
                 elif t < node.val: 
                     if node.left is None: 
                         node.left = TreeNode(t, None, None)
                     else: 
                         add(node.left, t)
+                        node.ccnt += 1
                 else: 
                     if node.right is None: 
                         node.right = TreeNode(t, None, None)
                     else: 
                         add(node.right, t)
+                        node.ccnt += 1
 
             add(root, timestamp)
         else: 
@@ -138,6 +194,7 @@ class Router1:
         if self.metadata[dest].left is None and self.metadata[dest].right is None: 
             if self.metadata[dest].cnt > 1: 
                 self.metadata[dest].cnt -= 1 
+                self.metadata[dest].ccnt -= 1
             else: 
                 del self.metadata[dest]
         else: 
@@ -145,6 +202,7 @@ class Router1:
             # print("del")
             def delete(node, t): 
                 # print(dest, node.val, t)
+                node.ccnt -= 1
                 if node.val == t: 
                     if node.cnt > 1: 
                         node.cnt -= 1 
@@ -154,7 +212,9 @@ class Router1:
                             while tmp.right is not None: 
                                 ptmp = tmp
                                 tmp = tmp.right 
+                                ptmp.ccnt -= 1
                             node.val, node.cnt = tmp.val, tmp.cnt
+                            node.ccnt += tmp.cnt
                             if ptmp:
                                 ptmp.right = tmp.left 
                             else: 
@@ -165,7 +225,9 @@ class Router1:
                             while tmp.left is not None: 
                                 ptmp = tmp
                                 tmp = tmp.left 
+                                ptmp.ccnt -= 1
                             node.val, node.cnt = tmp.val, tmp.cnt
+                            node.ccnt += tmp.cnt
                             if ptmp:
                                 ptmp.left = tmp.right
                             else: 
@@ -215,10 +277,27 @@ class Router1:
             
             return cnt
         
+        def count1(node, val): 
+            if node is None: 
+                return 0
+            ret = 0
+            if node.val < val: 
+                if node.left:
+                    ret = node.left.ccnt 
+                return ret + count1(node.right, val) + node.cnt
+            elif node.val > val: 
+                return count1(node.left, val)
+            else: 
+                if node.left:
+                    ret = node.left.ccnt 
+                return ret + node.cnt
+
+
         if destination not in self.metadata: 
             return 0
         root = self.metadata[destination]
-        cnt = count(root, startTime, endTime)
+        # cnt = count(root, startTime, endTime)
+        cnt = count1(root, endTime) - count1(root, startTime - 1)
         return cnt
 
 class Solution: 
@@ -248,14 +327,14 @@ if __name__ == "__main__":
     funcl = ["Router", "addPacket", "addPacket", "addPacket", "addPacket", "addPacket", "forwardPacket", "addPacket", "getCount"]
     argsl = [[3], [1, 4, 90], [2, 5, 90], [1, 4, 90], [3, 5, 95], [4, 5, 105], [], [5, 2, 110], [5, 100, 110]]
     
-    funcl = ["Router", "addPacket", "forwardPacket", "forwardPacket"]
-    argsl = [[2], [7, 4, 90], [], []]
+    # funcl = ["Router", "addPacket", "forwardPacket", "forwardPacket"]
+    # argsl = [[2], [7, 4, 90], [], []]
 
-    funcl = ["Router","addPacket","forwardPacket","getCount"] 
-    argsl = [[2],[2,5,1],[],[5,1,1]]
+    # funcl = ["Router","addPacket","forwardPacket","getCount"] 
+    # argsl = [[2],[2,5,1],[],[5,1,1]]
     
-    funcl = ["Router","addPacket","getCount","getCount","addPacket","addPacket","addPacket","addPacket"]
-    argsl = [[3],[3,5,1],[5,1,1],[5,1,1],[2,5,4],[2,4,9],[1,2,9],[1,3,9]]
+    # funcl = ["Router","addPacket","getCount","getCount","addPacket","addPacket","addPacket","addPacket"]
+    # argsl = [[3],[3,5,1],[5,1,1],[5,1,1],[2,5,4],[2,4,9],[1,2,9],[1,3,9]]
     ret = []
     for f, args in zip(funcl, argsl): 
         if f == "Router": 
