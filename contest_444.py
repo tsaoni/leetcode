@@ -1,7 +1,8 @@
 from typing import List
 import math
+import time
 
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, deque
 
 
 class Router:
@@ -90,53 +91,182 @@ class Router1:
     def __init__(self, memoryLimit: int):
         self.limit = memoryLimit 
         self.memory = []
+        self.seen = set()
         self.metadata = defaultdict(list)
-        
+    
+    def iter_search_left(self, dest, start, end, t): 
+        while True: 
+            if start == end: 
+                return start + 1 if dest[start] < t else start 
+            else:
+                mid = (start + end + 1) // 2 
+                if dest[mid] < t: 
+                    start = mid
+                else: 
+                    end = mid - 1
+
+    def iter_search_right(self, dest, start, end, t): 
+        while True: 
+            if start == end: 
+                return start if dest[start] > t else start + 1
+            else:
+                mid = (start + end) // 2 
+                if dest[mid] > t: 
+                    end = mid
+                else: 
+                    start = mid + 1
+
     def search_left(self, dest, start, end, t): 
         if start == end: 
-            return start 
+            return start + 1 if dest[start] < t else start 
+        # elif start == end - 1: 
+        #     if dest[start] >= t: 
+        #         return start 
+        #     elif dest[start] < t and dest[end] >= t: 
+        #         return end
+        #     else: 
+        #         return end + 1
         
-        return 
+        mid = (start + end + 1) // 2 
+        if dest[mid] < t: 
+            return self.search_left(dest, mid, end, t)
+        else: 
+            return self.search_left(dest, start, mid - 1, t)
+
 
     def search_right(self, dest, start, end, t): 
-        
-        return 
+        if start == end: 
+            return start if dest[start] > t else start + 1
+
+        mid = (start + end) // 2 
+        if dest[mid] > t: 
+            return self.search_right(dest, start, mid, t)
+        else: 
+            return self.search_right(dest, mid + 1, end, t)
 
     def addPacket(self, source: int, destination: int, timestamp: int) -> bool:
-        p = [source, destination, timestamp]
-        if p in self.memory: 
+        p = (source, destination, timestamp)
+        if p in self.seen: #self.memory: 
             return False
         self.memory.append(p)
-        self.metadata[destination].append(timestamp)
+        self.seen.add(p)
+        # self.metadata[destination].append(timestamp)
+        d = self.metadata[destination]
+        if len(d) == 0: 
+            d.append(timestamp)
+        else:
+            idx = self.iter_search_left(d, 0, len(d) - 1, timestamp)
+            d.insert(idx, timestamp)
+        
         if len(self.memory) > self.limit: 
-            _, dest, _ = self.memory.pop(0)
-            self.metadata[dest].pop(0)
+            s, dest, t = self.memory.pop(0)
+            self.seen.remove((s, dest, t))
+            # self.metadata[dest].pop(0)
+            d = self.metadata[dest]
+            idx = self.iter_search_left(d, 0, len(d) - 1, t)
+            d.pop(idx)
+            if not d: 
+                del self.metadata[dest]
         return True
 
     def forwardPacket(self) -> List[int]:
-        if len(self.memory) > 0: 
-            _, dest, _ = self.memory[0]
-            self.metadata[dest].pop(0)
-            return self.memory.pop(0)
+        if len(self.seen) > 0: 
+            s, dest, t = self.memory.pop(0)
+            # self.metadata[dest].pop(0)
+            d = self.metadata[dest]
+            idx = self.iter_search_left(d, 0, len(d) - 1, t)
+            d.pop(idx)
+            if not d: 
+                del self.metadata[dest]
+            self.seen.remove((s, dest, t))
+            return [s, dest, t]
         else:
             return []
 
     def getCount(self, destination: int, startTime: int, endTime: int) -> int:
-        cnt = 0
-        dest = self.metadata[destination]
-        if len(dest) == 0: 
-            return 0
-        dest = sorted(dest)
-    
-        sidx = self.search(dest, 0, len(dest) - 1, startTime, "u")
-        eidx = self.search(dest, 0, len(dest) - 1, endTime, "l")
-        # print(sidx, eidx)
-        if sidx >= 0 and eidx >= 0: 
-            return eidx - sidx + 1
+        if destination not in self.metadata: 
+            return 0 
         else: 
+            dest = self.metadata[destination]
+
+        # dest = sorted(dest)
+        # print(dest)
+    
+        sidx = self.iter_search_left(dest, 0, len(dest) - 1, startTime)
+        eidx = self.iter_search_right(dest, 0, len(dest) - 1, endTime)
+        # print(sidx, eidx)
+        
+        return eidx - sidx
+
+import collections
+class Router1_1:
+
+    def __init__(self, memoryLimit: int):
+        self.memLim = memoryLimit
+        self.q = collections.deque()
+        self.seen = set()
+        self.destMap = collections.defaultdict(list)
+
+    def findLeft(self, lst:  List[int], x: int) -> int:
+        lo, hi = 0, len(lst)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if lst[mid] < x:
+                lo = mid+1
+            else:
+                hi = mid
+        return lo
+
+    def findRight(self, lst: List[int], x: int) -> int:
+        lo, hi = 0, len(lst)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if lst[mid] <= x:
+                lo = mid+1
+            else:
+                hi = mid
+        return lo
+
+    def insert(self, lst: List[int], x: int):
+        idx = self.findLeft(lst, x)
+        lst.insert(idx, x)
+        
+    def addPacket(self, source: int, destination: int, timestamp: int) -> bool:
+        key = (source, destination, timestamp)
+        if key in self.seen:
+            return False
+        if len(self.seen) == self.memLim:
+            s0,d0,t0 = self.q.popleft()
+            self.seen.remove((s0,d0,t0))
+            lst0 = self.destMap[d0]
+            i0 = self.findLeft(lst0,t0)
+            lst0.pop(i0)
+            if not lst0:
+                del self.destMap[d0]
+        self.q.append((source, destination, timestamp))
+        self.seen.add(key)
+        self.insert(self.destMap[destination], timestamp)
+        return True
+            
+    def forwardPacket(self) -> List[int]:
+        if not self.q:
+            return []
+        s, d, t = self.q.popleft()
+        self.seen.remove((s,d,t))
+        lst = self.destMap[d]
+        i = self.findLeft(lst,t)
+        lst.pop(i)
+        if not lst:
+            del self.destMap[d]
+        return [s,d,t]
+
+    def getCount(self, destination: int, startTime: int, endTime: int) -> int:
+        if destination not in self.destMap:
             return 0
-
-
+        lst = self.destMap[destination]
+        lo = self.findLeft(lst, startTime)
+        ri = self.findRight(lst, endTime)
+        return ri - lo
 
 class TreeNode: 
     def __init__(self, val, left, right, ccnt=1): 
@@ -327,15 +457,20 @@ if __name__ == "__main__":
     funcl = ["Router", "addPacket", "addPacket", "addPacket", "addPacket", "addPacket", "forwardPacket", "addPacket", "getCount"]
     argsl = [[3], [1, 4, 90], [2, 5, 90], [1, 4, 90], [3, 5, 95], [4, 5, 105], [], [5, 2, 110], [5, 100, 110]]
     
-    # funcl = ["Router", "addPacket", "forwardPacket", "forwardPacket"]
-    # argsl = [[2], [7, 4, 90], [], []]
+    funcl = ["Router", "addPacket", "forwardPacket", "forwardPacket"]
+    argsl = [[2], [7, 4, 90], [], []]
 
-    # funcl = ["Router","addPacket","forwardPacket","getCount"] 
-    # argsl = [[2],[2,5,1],[],[5,1,1]]
+    funcl = ["Router","addPacket","forwardPacket","getCount"] 
+    argsl = [[2],[2,5,1],[],[5,1,1]]
     
-    # funcl = ["Router","addPacket","getCount","getCount","addPacket","addPacket","addPacket","addPacket"]
-    # argsl = [[3],[3,5,1],[5,1,1],[5,1,1],[2,5,4],[2,4,9],[1,2,9],[1,3,9]]
+    funcl = ["Router","addPacket","getCount","getCount","addPacket","addPacket","addPacket","addPacket"]
+    argsl = [[3],[3,5,1],[5,1,1],[5,1,1],[2,5,4],[2,4,9],[1,2,9],[1,3,9]]
+    
+    funcl = ["Router","addPacket","addPacket","addPacket","getCount"] 
+    argsl = [[2],[3,1,3],[1,2,3],[4,5,3],[1,2,3]]
+
     ret = []
+    start_time = time.time()
     for f, args in zip(funcl, argsl): 
         if f == "Router": 
             obj = Router1(*args)
@@ -344,3 +479,4 @@ if __name__ == "__main__":
             ret.append(getattr(obj, f)(*args))
 
     print(ret)
+    print("duration: ", time.time() - start_time)
