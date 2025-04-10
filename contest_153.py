@@ -2,33 +2,31 @@ import string
 from typing import List
 
 class SegmentTree: 
-    def __init__(self, arr): 
+    def __init__(self, arr, labels): 
         self.n = len(arr)
         self.tree = [0] * (4 * self.n)
-        self.build(arr, 0, 0, self.n - 1)
+        self.build(arr, labels, 0, 0, self.n - 1)
 
-    def build(self, arr, node, start, end): 
-        if start == end: 
-            self.tree[node] = arr[start]
+    def build(self, arr, labels, node, start, end): 
+        if end - start < 3: 
+            self.tree[node] = 0
         else: 
             mid = (start + end) // 2
             self.build(arr, 2 * node + 1, start, mid)
             self.build(arr, 2 * node + 2, mid + 1, end)
-            self.tree[node] = max(self.tree[2 * node + 1], self.tree[2 * node + 2])
+            if labels[mid] == '0': 
+                add_r = 0 
+                if mid >= 2: 
+                    add_r = max(add_r, (arr[mid - 1] - arr[mid - 2]) + (arr[mid + 1] - arr[mid]))
+                if mid < len(arr) - 3: 
+                    add_r = max(add_r, (arr[mid + 3] - arr[mid + 2]) + (arr[mid + 1] - arr[mid]))
+            else: # 1
+                add_r = 0 
+                if mid > 0 and mid < len(arr) - 2: 
+                    add_r = max(add_r, (arr[mid] - arr[mid - 1]) + (arr[mid + 2] - arr[mid + 1]))
 
+            self.tree[node] = max(add_r, self.tree[2 * node + 1], self.tree[2 * node + 2])
 
-    def set(self, index, value, node=0, start=0, end=None): 
-        if end is None: 
-            end = self.n - 1 
-        if start == end: 
-            self.tree[node] = value 
-        else: 
-            mid = (start + end) // 2 
-            if index <= mid: 
-                self.set(index, value, 2 * node + 1, start, mid)
-            else: 
-                self.set(index, value, 2 * node + 2, mid + 1, end)
-            self.tree[node] = max(self.tree[2 * node + 1], self.tree[2 * node + 2])
     
     def get_max(self, L, R, node=0, start=0, end=None): 
         if end is None: 
@@ -255,6 +253,7 @@ class Solution:
         prev = None
         seqs = [0]
         labels = []
+        act_num = 0
         for i, c in enumerate(s): 
             # if prev is not None and c == prev: 
             #     l += 1 
@@ -264,15 +263,18 @@ class Solution:
                 labels.append(prev)
                 # l = 1
             prev = c
+            if c == '1': 
+                act_num += 1
         seqs.append(len(s))
         labels.append(prev)
-        print(seqs)
+        # print(seqs)
 
-        # st = SegmentTree()
-        # for start, end in queries: 
-        #     st
-        
-        return 
+        ret = []
+        st = SegmentTree(seqs, labels)
+        for start, end in queries: 
+            inc = st.get_max(start, end)
+            ret.append(act_num + inc)
+        return ret
 
 if __name__ == "__main__": 
     # s = "01"
