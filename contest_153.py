@@ -1,6 +1,47 @@
 import string
 from typing import List
 
+class SegmentTree: 
+    def __init__(self, arr): 
+        self.n = len(arr)
+        self.tree = [0] * (4 * self.n)
+        self.build(arr, 0, 0, self.n - 1)
+
+    def build(self, arr, node, start, end): 
+        if start == end: 
+            self.tree[node] = arr[start]
+        else: 
+            mid = (start + end) // 2
+            self.build(arr, 2 * node + 1, start, mid)
+            self.build(arr, 2 * node + 2, mid + 1, end)
+            self.tree[node] = max(self.tree[2 * node + 1], self.tree[2 * node + 2])
+
+
+    def set(self, index, value, node=0, start=0, end=None): 
+        if end is None: 
+            end = self.n - 1 
+        if start == end: 
+            self.tree[node] = value 
+        else: 
+            mid = (start + end) // 2 
+            if index <= mid: 
+                self.set(index, value, 2 * node + 1, start, mid)
+            else: 
+                self.set(index, value, 2 * node + 2, mid + 1, end)
+            self.tree[node] = max(self.tree[2 * node + 1], self.tree[2 * node + 2])
+    
+    def get_max(self, L, R, node=0, start=0, end=None): 
+        if end is None: 
+            end = self.n - 1 
+        if R < start or L > end: 
+            return float("-inf")
+        if L <= start and R >= end: 
+            return self.tree[node]
+        mid = (start + end) // 2 
+        val = max(self.get_max(L, R, 2 * node + 1, start, mid), 
+                  self.get_max(L, R, 2 * node + 2, mid + 1, end))
+        return val
+
 class Solution: 
     def func(): 
         return 
@@ -211,6 +252,25 @@ class Solution:
         return ret
 
     def maxActiveSectionsAfterTrade_2(self, s: str, queries: List[List[int]]) -> List[int]:
+        prev = None
+        seqs = [0]
+        labels = []
+        for i, c in enumerate(s): 
+            # if prev is not None and c == prev: 
+            #     l += 1 
+            # else: 
+            if prev is not None and c != prev: 
+                seqs.append(i)
+                labels.append(prev)
+                # l = 1
+            prev = c
+        seqs.append(len(s))
+        labels.append(prev)
+        print(seqs)
+
+        # st = SegmentTree()
+        # for start, end in queries: 
+        #     st
         
         return 
 
@@ -238,6 +298,8 @@ if __name__ == "__main__":
     
     s = "01"
     queries = [[0,1]]
+    s = "0100"
+    queries = [[0,3],[0,2],[1,3],[2,3]]
     test_case = (s, queries, )
     ret = Solution().maxActiveSectionsAfterTrade_2(*test_case)
     print(ret)
