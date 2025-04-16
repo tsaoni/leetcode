@@ -3,42 +3,123 @@ from typing import List
 
 class SegmentTree: 
     def __init__(self, arr, labels): 
-        self.n = len(arr)
+        lens = [arr[i + 1] - arr[i] for i in range(len(arr) - 1)]
+        self.n = len(lens)
+        self.arr = arr 
+        self.lens = lens
+        self.map = self.build_map(arr)
+        self.labels = labels
         self.tree = [0] * (4 * self.n)
-        self.build(arr, labels, 0, 0, self.n - 1)
+        self.build(0, 0, self.n - 1)
 
-    def build(self, arr, labels, node, start, end): 
-        if end - start < 3: 
+    def build_map(self, arr): 
+        mp = []
+        idx = 1 
+        for i in range(arr[-1]): 
+            if i < arr[idx]: 
+                mp.append(idx - 1) 
+            else: 
+                mp.append(idx)
+                idx += 1 
+        return mp
+
+    def build(self, node, start, end): 
+        if end - start < 2: 
             self.tree[node] = 0
         else: 
             mid = (start + end) // 2
-            self.build(arr, 2 * node + 1, start, mid)
-            self.build(arr, 2 * node + 2, mid + 1, end)
-            if labels[mid] == '0': 
+            self.build(2 * node + 1, start, mid)
+            self.build(2 * node + 2, mid + 1, end)
+            if self.labels[mid] == '0': 
                 add_r = 0 
-                if mid >= 2: 
-                    add_r = max(add_r, (arr[mid - 1] - arr[mid - 2]) + (arr[mid + 1] - arr[mid]))
-                if mid < len(arr) - 3: 
-                    add_r = max(add_r, (arr[mid + 3] - arr[mid + 2]) + (arr[mid + 1] - arr[mid]))
+                if mid + 2 <= end:
+                    add_r = self.lens[mid] + self.lens[mid + 2]
+                # if mid >= 2: 
+                #     add_r = max(add_r, (arr[mid - 1] - arr[mid - 2]) + (arr[mid + 1] - arr[mid]))
+                # if mid < len(arr) - 3: 
+                #     add_r = max(add_r, (arr[mid + 3] - arr[mid + 2]) + (arr[mid + 1] - arr[mid]))
             else: # 1
                 add_r = 0 
-                if mid > 0 and mid < len(arr) - 2: 
-                    add_r = max(add_r, (arr[mid] - arr[mid - 1]) + (arr[mid + 2] - arr[mid + 1]))
+                if mid - 1 >= start:
+                    add_r = self.lens[mid - 1] + self.lens[mid + 1]
+                # if mid > 0 and mid < len(arr) - 2: 
+                #     add_r = max(add_r, (arr[mid] - arr[mid - 1]) + (arr[mid + 2] - arr[mid + 1]))
 
             self.tree[node] = max(add_r, self.tree[2 * node + 1], self.tree[2 * node + 2])
 
     
     def get_max(self, L, R, node=0, start=0, end=None): 
-        if end is None: 
-            end = self.n - 1 
-        if R < start or L > end: 
-            return float("-inf")
-        if L <= start and R >= end: 
-            return self.tree[node]
-        mid = (start + end) // 2 
-        val = max(self.get_max(L, R, 2 * node + 1, start, mid), 
-                  self.get_max(L, R, 2 * node + 2, mid + 1, end))
-        return val
+        lidx, ridx = self.map[L], self.map[R]
+        lcheck, rcheck = self.labels[lidx] == '0', self.labels[ridx] == '0'
+        # print(lidx, ridx)
+        
+        def get_max(node, start, end):
+            """ ignore this :') """
+            if start > ridx - 2 or end < lidx + 2: 
+                return 0 
+            elif start > lidx and end < ridx: 
+                return self.tree[node]
+            elif lcheck and start == lidx and end == lidx + 2: 
+                el = self.lens[end]
+                if end == ridx: 
+                    el = R - ridx + 1
+                return self.lens[start] + el - (L - lidx)
+            elif rcheck and start == ridx - 2 and end == ridx: 
+                er = self.lens[start]
+                if start == lidx: 
+                    er -= (L - lidx)
+                return er + R - ridx + 1
+            else:
+                mid = (start + end) // 2
+                if self.labels[mid] == '0': 
+                    add_r = 0 
+                    if mid + 2 < self.n:
+                        add_r = self.lens[mid] + self.lens[mid + 2]
+                else: # 1
+                    add_r = 0 
+                    if mid - 1 >= 0:
+                        add_r = self.lens[mid - 1] + self.lens[mid + 1]
+                return max(add_r, get_max(2 * node + 1, start, mid), get_max(2 * node + 2, mid + 1, end))
+
+        def get_max1(node, start, end, lidx, ridx):
+            if start >= lidx and end <= ridx: 
+                return self.tree[node]
+            elif self.tree[node] == 0: 
+                return 0
+            else:
+                mid = (start + end) // 2
+                if self.labels[mid] == '0': 
+                    add_r = 0 
+                    if mid + 2 < self.n and mid >= lidx and mid + 2 <= ridx:
+                        add_r = self.lens[mid] + self.lens[mid + 2]
+                else: # 1
+                    add_r = 0 
+                    if mid - 1 >= 0 and mid - 1 >= lidx and mid + 1 <= ridx:
+                        add_r = self.lens[mid - 1] + self.lens[mid + 1]
+                # import pdb 
+                # pdb.set_trace()
+                return max(add_r, get_max1(2 * node + 1, start, mid, lidx, ridx), get_max1(2 * node + 2, mid + 1, end, lidx, ridx))
+
+        li, ri = lidx, ridx
+        lval, rval = 0, 0
+        if lcheck:
+            li = lidx + 1
+        if rcheck: 
+            ri = ridx - 1
+        
+        if (ridx - int(rcheck ^ 1)) - (lidx + int(lcheck ^ 1)) > 1:
+            if lcheck and lidx + 2 < self.n:
+                tmp = R - self.arr[ridx] + 1  if ridx == lidx + 2 else self.lens[lidx + 2] 
+                lval = self.lens[lidx] - (L - self.arr[lidx]) + tmp
+            if rcheck and ridx - 2 >= 0:
+                tmp = self.lens[lidx] - (L - self.arr[lidx]) if lidx == ridx - 2 else self.lens[ridx - 2]
+                rval = tmp + R - self.arr[ridx] + 1 
+                
+        print(li, ri)
+        print(lval, rval, get_max1(0, 0, self.n - 1, li, ri))
+        return max(lval, rval, get_max1(0, 0, self.n - 1, li, ri))
+
+
 
 class Solution: 
     def func(): 
@@ -271,6 +352,9 @@ class Solution:
 
         ret = []
         st = SegmentTree(seqs, labels)
+        # print(st.tree)
+        # print(st.map)
+        # return 
         for start, end in queries: 
             inc = st.get_max(start, end)
             ret.append(act_num + inc)
@@ -302,6 +386,14 @@ if __name__ == "__main__":
     queries = [[0,1]]
     s = "0100"
     queries = [[0,3],[0,2],[1,3],[2,3]]
+    # s = "1000100" 
+    # queries = [[1,5],[0,6],[0,4]] 
+    # s = "01010" 
+    # queries = [[0,3],[1,4],[1,3]]
+    # s = "01011"
+    # queries = [[0,4]]
+    # s = "10101000010101" 
+    # queries = [[9,11]]
     test_case = (s, queries, )
     ret = Solution().maxActiveSectionsAfterTrade_2(*test_case)
     print(ret)
