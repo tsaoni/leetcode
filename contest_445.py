@@ -15,6 +15,7 @@ class Solution:
             return "".join(cl) + "".join(cl[::-1]) if len(s) % 2 == 0 else "".join(cl) + s[l + 1] +  "".join(cl[::-1])
     
     def smallestPalindrome_2(self, s: str, k: int) -> str:
+        """too bad, TLE"""
         if len(s) == 1: 
             return s if k == 1 else ""
         else:
@@ -86,6 +87,14 @@ class Solution:
 
         return perm(cl, 0, 0)[1]
 
+    def smallestPalindrome_2_1(self, s: str, k: int) -> str:
+        if len(s) == 1: 
+            return s if k == 1 else ""
+        else:
+            l = len(s) // 2 - 1
+            cl = sorted(s[: l + 1])
+
+
 if __name__ == "__main__": 
     s = "abba"
     k = 2
@@ -102,5 +111,5 @@ if __name__ == "__main__":
     s = "ztyzzytz" 
     k = 15
     test_case = (s, k)
-    ret = Solution().smallestPalindrome_2(*test_case)
+    ret = Solution().smallestPalindrome_2_1(*test_case)
     print(ret)
