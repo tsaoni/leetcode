@@ -94,6 +94,9 @@ class Solution:
             l = len(s) // 2 - 1
             cl = sorted(s[: l + 1])
 
+        def perm(): 
+            return 
+
 
 if __name__ == "__main__": 
     s = "abba"
