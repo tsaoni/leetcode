@@ -91,12 +91,88 @@ class Solution:
         if len(s) == 1: 
             return s if k == 1 else ""
         else:
-            l = len(s) // 2 - 1
-            cl = sorted(s[: l + 1])
+            l = len(s) // 2 
+            cl = sorted(s[: l])
+            cmid = s[l] if len(s) & 1 else ""
+            cs = []
+            cnts, ptrs = [], [] 
+            prev = None
+            for c in cl: 
+                if prev != c: 
+                    cs.append(c)
+                    cnts.append(1)
+                    ptrs.append(len(cnts))
+                else: 
+                    cnts[-1] += 1
+                prev = c 
+            Nc = len(cnts) 
+            # print(cs)
+            # print(cnts) 
+            # print(ptrs) 
 
-        def perm(): 
-            return 
+            def perm_num(cnts): 
+                total = sum(cnts)
+                fl = [1] 
+                for i in range(total): 
+                    fl.append((i + 1) * fl[-1])
+                
+                ret = fl[total] #math.factorial(total) 
+                for n in cnts:
+                    ret //= fl[n] #math.factorial(n)
+                return ret
+            cur_pn = perm_num(cnts)
+            # print(cur_pn)
+            
+            def perm(start, kr, kstr): 
+                nonlocal cur_pn
+                # if kr == 0: 
+                #     i = start 
+                #     while i < Nc: 
+                #         kstr += cs[i] * cnts[i]
+                #         i = ptrs[i]
+                #     return kstr 
+                
+                i = start
+                # for i in range(start, Nc): 
+                while i < Nc:
+                    tmp = cur_pn
+                    tmp *= cnts[i]
+                    tmp //= (len(cl) - len(kstr))
+                    cnts[i] -= 1 
+                    # tmp = perm_num(cnts)
+                    if tmp < kr: 
+                        kr -= tmp
+                        cnts[i] += 1 
+                        i = ptrs[i]
+                        continue 
+                    elif tmp == kr: 
+                        kstr += cs[i]
+                        i = start 
+                        subs = ""
+                        while i < Nc: 
+                            subs += cs[i] * cnts[i]
+                            i = ptrs[i]
+                        kstr += subs[::-1]
+                        return kstr + cmid + kstr[::-1]
+                    else: 
+                        cur_pn = tmp
+                        nstart = start
+                        if cnts[i] == 0: 
+                            pi = i
+                            while pi >= 0 and cnts[pi] == 0: 
+                                pi -= 1 
+                            if pi >= 0: 
+                                ptrs[pi] = ptrs[i]
+                            
+                            # print(nstart, cnts)
+                            while cnts[nstart] == 0:
+                                nstart += 1
+            
+                        return perm(nstart, kr, kstr + cs[i])
+                        cnts[i] += 1 
+                return ""
 
+            return perm(0, k, "")
 
 if __name__ == "__main__": 
     s = "abba"
@@ -105,14 +181,16 @@ if __name__ == "__main__":
     # k = 2
     # s = "bacab"
     # k = 1
-    s = "xiccix"
-    k = 6
-    s = "ghdhhdhg"
-    k = 5
+    # s = "xiccix"
+    # k = 6
+    # s = "ghdhhdhg"
+    # k = 5
     # s = "xxnfnxx" 
     # k = 3
-    s = "ztyzzytz" 
-    k = 15
+    # s = "ztyzzytz" 
+    # k = 15
+    s = "kkkk"
+    k = 1
     test_case = (s, k)
     ret = Solution().smallestPalindrome_2_1(*test_case)
     print(ret)
