@@ -40,7 +40,14 @@ class Solution:
         # print(ret)
         return len(ret)
 
+    def treeQueries1(self, n: int, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
+        
+        return 
+
     def treeQueries(self, n: int, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
+        """
+        abort
+        """
         # parent = [-1 for i in range(n)]
         T = [[] for i in range(n)]
         acc = 0
@@ -88,5 +95,5 @@ if __name__ == "__main__":
     # test_case = (nums, )
     # ret = Solution().uniqueXorTriplets(*test_case)
     
-    ret = Solution().treeQueries
+    ret = Solution().treeQueries1()
     print(ret)
