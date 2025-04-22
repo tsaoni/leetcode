@@ -41,7 +41,31 @@ class Solution:
         return len(ret)
 
     def treeQueries1(self, n: int, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
+        T = [[] for _ in range(n)] 
+        for u, v, w in edges: 
+            T[u - 1].append((v - 1, w))
+            T[v - 1].append((u - 1, w))
         
+        visited = [False] * n
+        update_lst = [[0, 0, 0, []] for _ in range(n)]  # depth, width, weight, ranges per depth
+        flatten_T = [] # store indexes
+        def dfs(u, depth): 
+            visited[u] = True
+            if depth == len(flatten_T):
+                flatten_T.append([])
+            for v, w in T[u]: 
+                if not visited[v]:
+                    flatten_T[depth].append(v)
+                    end = dfs(v, depth + 1)
+
+        dfs(0, 0) 
+
+        lowbit = lambda x: x & -x 
+        def query(): 
+            return 
+        def update(): 
+            return 
+
         return 
 
     def treeQueries(self, n: int, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
