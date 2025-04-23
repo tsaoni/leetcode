@@ -41,32 +41,88 @@ class Solution:
         return len(ret)
 
     def treeQueries1(self, n: int, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
+        
+        class SegmentTree: 
+            def __init__(self, T, pinfo): 
+                self.n = len(T)
+                self.tree = [0] * (4 * self.n)
+                self.pinfo = pinfo 
+            
+
+            def set(self, u, v, w): 
+                if self.pinfo[u][0] == v: 
+                    delta = w - self.pinfo[u][1] 
+                    self.pinfo[u][1] = w
+                    r = self.pinfo[u][-1]
+                else: 
+                    delta = w - self.pinfo[v][1]
+                    self.pinfo[v][1] = w
+                    r = self.pinfo[v][-1]
+
+                # print(r)
+                # import pdb 
+                # pdb.set_trace()
+                def update(left, right, value, node=0, start=0, end=self.n - 1): 
+                    if start >= left and end <= right: 
+                        self.tree[node] += value
+                    else:
+                        # import pdb 
+                        # pdb.set_trace()
+                        mid = (start + end) // 2 
+                        if left <= mid: 
+                            update(left, right, value, 2 * node + 1, start, mid)
+                        if right >= mid + 1: 
+                            update(left, right, value, 2 * node + 2, mid + 1, end)
+            
+
+                update(r[0], r[1], delta)
+
+            
+            def get_max(self, x, node=0, start=0, end=None): 
+                # TODO: add all in range
+                end = self.n - 1 if end is None else end
+                if start == end: 
+                    return self.pinfo[x][2] + self.tree[node]
+                else: 
+                    idx = self.pinfo[x][-1][0]
+                    mid = (start + end) // 2 
+                    if idx <= mid: 
+                        return self.get_max(x, 2 * node + 1, start, mid) + self.tree[node]
+                    else: 
+                        return self.get_max(x, 2 * node + 2, mid + 1, end) + self.tree[node]
+              
+            
         T = [[] for _ in range(n)] 
         for u, v, w in edges: 
             T[u - 1].append((v - 1, w))
             T[v - 1].append((u - 1, w))
         
-        visited = [False] * n
-        update_lst = [[0, 0, 0, []] for _ in range(n)]  # depth, width, weight, ranges per depth
-        flatten_T = [] # store indexes
-        def dfs(u, depth): 
-            visited[u] = True
-            if depth == len(flatten_T):
-                flatten_T.append([])
+        pinfo = [[-1, 0, 0, None]] + [None] * (n - 1) # parent id, weights, shortest path, range
+        linear_T = [] # store indexes
+        def dfs(u, pl): 
+            start = len(linear_T)
+            linear_T.append(u)
             for v, w in T[u]: 
-                if not visited[v]:
-                    flatten_T[depth].append(v)
-                    end = dfs(v, depth + 1)
-
+                if v > 0 and pinfo[v] is None:
+                    pinfo[v] = [u, w, pl + w, None]
+                    dfs(v, pl + w)
+            end = len(linear_T) - 1 
+            pinfo[u][-1] = (start, end)
+        
         dfs(0, 0) 
 
-        lowbit = lambda x: x & -x 
-        def query(): 
-            return 
-        def update(): 
-            return 
-
-        return 
+        ret = []
+        st = SegmentTree(linear_T, pinfo)
+        for query in queries: 
+            # print(st.tree)
+            if query[0] == 1: 
+                u, v, w = query[1: ]
+                st.set(u - 1, v - 1, w)
+            else: 
+                x = query[1]
+                v = st.get_max(x - 1)
+                ret.append(v)
+        return ret
 
     def treeQueries(self, n: int, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
         """
@@ -119,5 +175,26 @@ if __name__ == "__main__":
     # test_case = (nums, )
     # ret = Solution().uniqueXorTriplets(*test_case)
     
-    ret = Solution().treeQueries1()
+    n = 2
+    edges = [[1,2,7]]
+    queries = [[2,2],[1,1,2,4],[2,2]]
+
+    # n = 3
+    # edges = [[1,2,2],[1,3,4]]
+    # queries = [[2,1],[2,3],[1,1,3,7],[2,2],[2,3]]
+
+    # n = 4
+    # edges = [[1,2,2],[2,3,1],[3,4,5]]
+    # queries = [[2,4],[2,3],[1,2,3,3],[2,2],[2,3]]
+
+    # n = 4 
+    # edges = [[1,2,2],[2,3,3],[3,4,4]] 
+    # queries = [[2,4],[1,2,3,10],[2,3],[1,2,3,1],[2,3]]
+
+    # n = 10 
+    # edges = [[1,2,3969],[4,9,3993],[2,4,9995],[5,6,7868],[1,5,9522],[7,8,4606],[2,3,5012],[2,10,5438],[2,7,1353]] 
+    # queries = [[1,2,4,1086],[1,4,9,6913],[2,9],[2,10],[2,4]]
+
+    test_case = (n, edges, queries)
+    ret = Solution().treeQueries1(*test_case)
     print(ret)
