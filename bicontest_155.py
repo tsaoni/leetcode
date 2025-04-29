@@ -116,17 +116,45 @@ class Solution:
         vidx_fn = lambda idx: (idx % nr, idx // nr) #lambda r, c: nc * c + r
         hbm, vbm = [0] * nr * nc, [0] * nr * nc
     
+        def kmp(s): 
+            idxs = [-1] + [0] * len(s)
+            pos, cnd = 2, 0 
+            while pos < len(s) + 1: 
+                if s[pos - 1] == s[cnd]: 
+                    cnd += 1 
+                    idxs[pos] = cnd 
+                    pos += 1
+                   
+                elif cnd > 0: 
+                    cnd = idxs[cnd]
+                else: 
+                    idxs[pos] = 0
+                    pos += 1 
+           
+            return idxs
+
+        # ret = kmp(pattern)
+
         def match(s, bitmap): 
-            idx = 0
+            sidx, pidx = 0, 0
             ret = []
             N = len(pattern)
-            while idx <= nr * nc: 
+            idxs = kmp(pattern)
+            while sidx <= nr * nc: 
                 
-                tmp = s[idx:].index(pattern) if pattern in s[idx:] else -1
-                if tmp < 0: 
-                    break
-                nidx = tmp + idx
-                bitmap[nidx: nidx + N] = [1] * N
+                if pidx == N or s[sidx] != pattern[pidx]: 
+                    kmp
+                if s[sidx] == pattern[pidx]: 
+                    sidx += 1 
+                    pidx += 1
+                # this will cost more time.. 
+                # tmp = s[idx:].index(pattern) if pattern in s[idx:] else -1
+                # if tmp < 0: 
+                #     break
+                # nidx = tmp + idx
+                # bitmap[nidx: nidx + N] = [1] * N
+                # idx = nidx + 1
+                
                     # ret.extend([x for x in range(start, idx)])
                     # for i in range(start, idx): 
                     #     bitmap[i] = 1 
@@ -135,7 +163,7 @@ class Solution:
                 #     idx += 1
                 # else: 
                 #     idx = nidx
-                idx = nidx + 1
+                
                 # print(idx, nidx)
             # return set(ret) 
         
