@@ -136,24 +136,42 @@ class Solution:
         # ret = kmp(pattern)
 
         def match(s, bitmap): 
-            sidx, pidx = 0, 0
+            sidx, pidx = 0, 1
+            start = sidx
             ret = []
             N = len(pattern)
             idxs = kmp(pattern)
-            while sidx <= nr * nc: 
+            # idxs = [-1] * (N + 1)
+            while sidx < nr * nc: 
+                """need to implement kmp here.."""
                 
-                if pidx == N or s[sidx] != pattern[pidx]: 
-                    kmp
-                if s[sidx] == pattern[pidx]: 
+                if pidx > 0 and s[sidx] == pattern[pidx - 1]: 
                     sidx += 1 
                     pidx += 1
-                # this will cost more time.. 
-                # tmp = s[idx:].index(pattern) if pattern in s[idx:] else -1
-                # if tmp < 0: 
-                #     break
-                # nidx = tmp + idx
-                # bitmap[nidx: nidx + N] = [1] * N
-                # idx = nidx + 1
+                    # print('a', pidx, sidx, start)
+                elif pidx > 1: 
+                    pidx = idxs[pidx - 1] + 1
+                    start = sidx - pidx + 1
+                    # print(pidx, sidx, start)
+                else:
+                    pidx = 1
+                    sidx += 1
+                    start = sidx
+
+                if pidx == N + 1: 
+                    pidx = idxs[pidx - 1] + 1
+                    for i in range(start, sidx): 
+                        bitmap[i] = 1
+                    start = sidx
+                
+            # """this will cost more time.. """
+            # for idx in range(nr * nc):
+            #     tmp = s[idx:].index(pattern) if pattern in s[idx:] else -1
+            #     if tmp < 0: 
+            #         break
+            #     nidx = tmp + idx
+            #     bitmap[nidx: nidx + N] = [1] * N
+            #     idx = nidx + 1
                 
                     # ret.extend([x for x in range(start, idx)])
                     # for i in range(start, idx): 
@@ -171,6 +189,16 @@ class Solution:
         match(vs, vbm)
         # print(hbm)
         # print(vbm)
+
+        nvbm = [[] for _ in range(nr)]
+        for i in range(nc): 
+            for j in range(nr): 
+                nvbm[j].append(vbm[i * nr + j])
+        vbm = list(chain(*nvbm))
+        import numpy as np 
+        return int(sum(np.array(hbm) & np.array(vbm)))
+        
+        """this will be slow... """
         ret = 0
         # for i in range(nr * nc): 
         i = 0 
@@ -209,6 +237,7 @@ if __name__ == "__main__":
 
     # grid = [["h","h","y"],["y","y","n"],["s","y","y"],["y","y","n"],["n","n","x"],["i","l","x"]]
     # pattern = "yn"
+
 
     test_case = (grid, pattern)
     ret = Solution().countCells1(*test_case)
