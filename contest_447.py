@@ -5,7 +5,51 @@ class Solution:
     def func(): 
         return 
     
+    def countCoveredBuildings1(self, n: int, buildings: List[List[int]]) -> int:
+        r_intervals = [(-1, -1)] * n 
+        c_intervals = [(-1, -1)] * n 
+
+        def detect_and_update(interval, v, chk_idx, chk_intervals): 
+            d = 0
+            if interval[0] < 0: 
+                interval = (v, v) 
+                return interval, False, d
+            else: 
+                if v <= interval[0]: 
+                    
+                    if v < interval[0] and len(set(interval)) > 1: 
+                        if chk_idx > chk_intervals[interval[0]][0] and chk_idx < chk_intervals[interval[0]][1]: 
+                            # print(v, chk_idx, interval[0])
+                            d = 1
+                    interval = (v, interval[1])
+                    return interval, False, d
+                elif v >= interval[1]: 
+
+                    if v > interval[1] and len(set(interval)) > 1: 
+                        if chk_idx > chk_intervals[interval[1]][0] and chk_idx < chk_intervals[interval[1]][1]: 
+                            # print(v, chk_idx, interval[1])
+                            d = 1
+                    interval = (interval[0], v)
+                    return interval, False, d
+                else: 
+                    return interval, True, d
+
+        ret = 0  
+        for x, y in buildings: 
+            r, c = x - 1, y - 1 
+            # print("r")
+            r_intervals[r], is_ccover, cadd = detect_and_update(r_intervals[r], c, r, c_intervals)
+            # print("c")
+            c_intervals[c], is_rcover, radd = detect_and_update(c_intervals[c], r, c, r_intervals)
+            ret += is_ccover & is_rcover
+            ret += (cadd + radd)
+            
+        return ret
+
     def countCoveredBuildings(self, n: int, buildings: List[List[int]]) -> int:
+        """
+        results in TLE
+        """
         grid = [[0] * n for _ in range(n)]
         hr = [[] for _ in range(n)]
         vr = [[] for _ in range(n)]
@@ -89,31 +133,31 @@ class Solution:
         return ret
     
 if __name__ == "__main__": 
-    # n = 3
-    # buildings = [[1,2],[2,2],[3,2],[2,1],[2,3]]
-    # n = 3
-    # buildings = [[1,1],[1,2],[2,1],[2,2]]
+    n = 3
+    buildings = [[1,2],[2,2],[3,2],[2,1],[2,3]]
+    n = 3
+    buildings = [[1,1],[1,2],[2,1],[2,2]]
 
-    # n = 5
-    # buildings = [[1,3],[3,2],[3,3],[3,5],[5,3]]
+    n = 5
+    buildings = [[1,3],[3,2],[3,3],[3,5],[5,3]]
 
-    # n = 3
-    # buildings = [[2,3],[3,3],[1,3]]
+    n = 3
+    buildings = [[2,3],[3,3],[1,3]]
 
-    # test_case = (n, buildings)
-    # ret = Solution().countCoveredBuildings(*test_case)
-    # print(ret)
+    test_case = (n, buildings)
+    ret = Solution().countCoveredBuildings1(*test_case)
+    print(ret)
 
-    n = 2
-    nums = [1,3]
-    maxDiff = 1
-    queries = [[0,0],[0,1]] 
+    # n = 2
+    # nums = [1,3]
+    # maxDiff = 1
+    # queries = [[0,0],[0,1]] 
 
     # n = 4
     # nums = [2,5,6,8]
     # maxDiff = 2
     # queries = [[0,1],[0,2],[1,3],[2,3]]
 
-    test_case = (n, nums, maxDiff, queries)
-    ret = Solution().pathExistenceQueries(*test_case)
-    print(ret)
+    # test_case = (n, nums, maxDiff, queries)
+    # ret = Solution().pathExistenceQueries(*test_case)
+    # print(ret)
