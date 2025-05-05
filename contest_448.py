@@ -41,8 +41,37 @@ class Solution:
         return grid
 
     def minTravelTime1(self, l: int, n: int, k: int, position: List[int], time: List[int]) -> int:
+        """
+        should use DP and recursive
+        time complexity: O((n * k) ** 2)
+        """
+        from itertools import accumulate
+        acc_time = list(accumulate(time))
+        print(acc_time)
+
+        dp = [[[0] * n for _ in range(n)] for _ in range(k + 1)]
+        for ck in range(k + 1): 
+            for ci in range(1, n): 
+                for j in range(min(ck + 1, ci)):
+                    if ci - j >= 0:
+                        tmp = float("inf")
+                        d = position[ci] - position[ci - j - 1]
+                        if ci - j - 1 == 0: 
+                            t = time[0]
+                            tmp = t * d
+                        else:
+                            for w in range(1, ci - ck):#ci - j): 
+                                t = acc_time[ci - j - 1] - acc_time[w - 1]
+                                tmp = min(tmp, dp[ck - j][ci - j - 1][w] + t * d)
+                                # import pdb 
+                                # pdb.set_trace()
+                        
+                        dp[ck][ci][ci - j] = tmp
         
-        return 
+        print(dp[k][n - 1])
+        print(dp)
+        
+        return min(dp[k][n - 1])
 
     def minTravelTime(self, l: int, n: int, k: int, position: List[int], time: List[int]) -> int:
         """
@@ -98,5 +127,6 @@ if __name__ == "__main__":
     # k = 1
     # position = [0,3,4]
     # time = [1,2,2]
-    ret = Solution().minTravelTime(l, n, k, position, time)
+    # print(Solution().minTravelTime(l, n, 1, position, time))
+    ret = Solution().minTravelTime1(l, n, k, position, time)
     print(ret)
