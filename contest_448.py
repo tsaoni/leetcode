@@ -40,6 +40,7 @@ class Solution:
                 
         return grid
 
+
     def minTravelTime1(self, l: int, n: int, k: int, position: List[int], time: List[int]) -> int:
         """
         should use DP and recursive
@@ -47,29 +48,33 @@ class Solution:
         """
         from itertools import accumulate
         acc_time = list(accumulate(time))
-        print(acc_time)
+        # print(acc_time)
 
-        dp = [[[0] * n for _ in range(n)] for _ in range(k + 1)]
+        dp = [[[float("inf")] * n for _ in range(n)] for _ in range(k + 1)]
         for ck in range(k + 1): 
             for ci in range(1, n): 
                 for j in range(min(ck + 1, ci)):
-                    if ci - j >= 0:
+                    if True: #ci - j >= 0:
                         tmp = float("inf")
                         d = position[ci] - position[ci - j - 1]
                         if ci - j - 1 == 0: 
-                            t = time[0]
-                            tmp = t * d
+                            if ck == j:
+                                t = time[0]
+                                tmp = t * d
+                                # print(tmp, ck, j)
                         else:
                             for w in range(max(ci - ck - 1, 1), ci - j):#ci - j): 
                                 t = acc_time[ci - j - 1] - acc_time[w - 1]
                                 tmp = min(tmp, dp[ck - j][ci - j - 1][w] + t * d)
+                                # if tmp == 15: 
+
                                 # import pdb 
                                 # pdb.set_trace()
                         
                         dp[ck][ci][ci - j] = tmp
         
-        print(dp[k][n - 1])
-        print(dp)
+        # print(dp[k][n - 1])
+        # print(dp)
         
         return min(dp[k][n - 1])
 
@@ -116,17 +121,23 @@ if __name__ == "__main__":
     position = [0,3,8,10]
     time = [5,8,3,6]
 
-    # l = 5
-    # n = 5
-    # k = 1
-    # position = [0,1,2,3,5]
-    # time = [8,3,9,3,3]
+    l = 5
+    n = 5
+    k = 1
+    position = [0,1,2,3,5]
+    time = [8,3,9,3,3]
 
-    # l = 4
-    # n = 3
-    # k = 1
-    # position = [0,3,4]
-    # time = [1,2,2]
+    l = 4
+    n = 3
+    k = 1
+    position = [0,3,4]
+    time = [1,2,2]
+
+    l = 5
+    n = 5
+    k = 2
+    position = [0,2,3,4,5]
+    time = [1,1,3,2,1]
     # print(Solution().minTravelTime(l, n, 1, position, time))
     ret = Solution().minTravelTime1(l, n, k, position, time)
     print(ret)
