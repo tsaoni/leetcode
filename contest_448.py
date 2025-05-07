@@ -60,7 +60,7 @@ class Solution:
                             t = time[0]
                             tmp = t * d
                         else:
-                            for w in range(1, ci - ck):#ci - j): 
+                            for w in range(max(ci - ck - 1, 1), ci - j):#ci - j): 
                                 t = acc_time[ci - j - 1] - acc_time[w - 1]
                                 tmp = min(tmp, dp[ck - j][ci - j - 1][w] + t * d)
                                 # import pdb 
