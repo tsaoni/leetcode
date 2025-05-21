@@ -43,6 +43,9 @@ class Solution:
         return ret 
 
     def minMoves(self, matrix: List[str]) -> int:
+        """
+        will result in TLE
+        """
         from collections import defaultdict
         import heapq
         m, n = len(matrix), len(matrix[0])
@@ -58,24 +61,69 @@ class Solution:
         
         d = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         while len(paths) > 0: 
-            npaths = []
+            npaths = set()
             for i, j in paths: 
                 dst = dest[i][j]
                 for di, dj in d:
                     if i + di >= 0 and i + di < m and j + dj >= 0 and j + dj < n:
                         if (dest[i + di][j + dj] == -1 or dest[i + di][j + dj] > dst + 1)  and matrix[i + di][j + dj] != "#": 
                             dest[i + di][j + dj] = dst + 1
-                            npaths.append((i + di, j + dj))
+                            npaths.add((i + di, j + dj))
                 
                 if matrix[i][j] != ".": 
                     for ti, tj in port[matrix[i][j]]: 
                         if dest[ti][tj] == -1 or dest[ti][tj] > dst: 
-                            npaths.append((ti, tj))
+                            npaths.add((ti, tj))
                             dest[ti][tj] = dst 
                     
             paths = npaths
             
         return dest[-1][-1]
+        
+    def minMoves1(self, matrix: List[str]) -> int:
+        from collections import defaultdict
+        import heapq
+        m, n = len(matrix), len(matrix[0])
+        # grid = [[c for c in m] for m in matrix]
+        dest = [[0] * n for _ in range(m)]
+        dest[0][0] = 1
+        paths = {(0, 0)}
+        port = defaultdict(list)
+        for i in range(m): 
+            for j in range(n): 
+                if not matrix[i][j] in [".", "#"]: 
+                    port[matrix[i][j]].append((i, j))
+        
+        d = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        t = 0
+        if matrix[0][0] != ".": 
+            for ti, tj in port[matrix[0][0]]: 
+                if dest[ti][tj] == 0: 
+                    paths.add((ti, tj))
+                    dest[ti][tj] = 1
+        while True: 
+            npaths = set()
+            for i, j in paths: 
+                if i == m - 1 and j == n - 1: 
+                    return t 
+                for di, dj in d:
+                    if i + di >= 0 and i + di < m and j + dj >= 0 and j + dj < n:
+                        if (dest[i + di][j + dj] == 0)  and matrix[i + di][j + dj] != "#": 
+                            dest[i + di][j + dj] = 1
+                            npaths.add((i + di, j + dj))
+                
+                        if matrix[i + di][j + dj] != ".": 
+                            for ti, tj in port[matrix[i + di][j + dj]]: 
+                                if dest[ti][tj] == 0: 
+                                    npaths.add((ti, tj))
+                                    dest[ti][tj] = 1
+                            port[matrix[i + di][j + dj]] = []
+            if len(npaths) > 0:
+                paths = npaths
+                t += 1
+            else: 
+                return -1
+            
         
 
 if __name__ == "__main__": 
@@ -86,7 +134,10 @@ if __name__ == "__main__":
     # print(ret)
 
     matrix = ["A..",".A.","..."]
-    matrix = [".#...",".#.#.",".#.#.","...#."]
-    ret = Solution().minMoves(matrix)
+    # matrix = [".#...",".#.#.",".#.#.","...#."]
+    # matrix = ["."]
+    # matrix = [".","#"]
+    matrix = ["..#DDF","#.H.F#","D.#A#.","#BF...","BFD.#A","CEEG.B",".FA.FG","F.E#.E"]
+    ret = Solution().minMoves1(matrix)
     print(ret)
     
