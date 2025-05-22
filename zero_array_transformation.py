@@ -25,10 +25,83 @@ class Solution:
         
         return -1 
 
+    def maxRemoval(self, nums: List[int], queries: List[List[int]]) -> int:
+        """
+        will result in TLE
+        """
+        import heapq
+        N = len(nums)
+        queries.sort()
+        buffers = [0] * N 
+        queue = []
+        cur = -1
+        n_remain = 0
+        for i in range(N): 
+            while cur < len(queries) - 1 and i >= queries[cur + 1][0] and i <= queries[cur + 1][1]: 
+                cur += 1 
+                heapq.heappush(queue, [-queries[cur][1], *queries[cur]])
+            # print(queue)
+            while len(queue) > 0 and buffers[i] < nums[i]: 
+                x = heapq.heappop(queue)
+                if x[1] <= i: 
+                    n_remain += 1
+                    # print(x)
+                    for idx in range(i, x[2] + 1): 
+                        buffers[idx] += 1 
+            if buffers[i] < nums[i]: 
+                return -1 
+            # print(buffers)
+        
+        return len(queries) - n_remain
+
+    def maxRemoval1(self, nums: List[int], queries: List[List[int]]) -> int:
+        import heapq
+        N = len(nums)
+        queries.sort()
+        # buffers = [0] * N 
+        queue = []
+        active = []
+        cur = -1
+        n_remain = 0
+        for i in range(N): 
+            while cur < len(queries) - 1 and i >= queries[cur + 1][0] and i <= queries[cur + 1][1]: 
+                cur += 1 
+                heapq.heappush(queue, [-queries[cur][1], *queries[cur]])
+            # print(queue)
+            
+            while len(active) > 0 and active[0] < i: 
+                heapq.heappop(active)
+            while len(queue) > 0 and len(active) < nums[i]: 
+                x = heapq.heappop(queue)
+                if x[1] <= i and i <= x[2]: 
+                    # n_remain += 1
+                    heapq.heappush(active, x[2])
+                    # print(x)
+                    # for idx in range(i, x[2] + 1): 
+                    #     buffers[idx] += 1 
+            
+            # print(active)
+            if len(active) < nums[i]: 
+                return -1 
+            # print(buffers)
+        
+        return len(queue) 
+
 if __name__ == "__main__": 
     nums = [1,0,1]
     queries = [[0,2]]
     # nums = [4,3,2,1]
     # queries = [[1,3],[0,2]]
-    ret = Solution().isZeroArray(nums, queries)
+    # ret = Solution().isZeroArray(nums, queries)
+    # print(ret)
+
+    nums = [2,0,2]
+    queries = [[0,2],[0,2],[1,1]]
+    # nums = [1,1,1,1]
+    # queries = [[1,3],[0,2],[1,3],[1,2]]
+    nums = [1,2,3,4]
+    queries = [[0,3]]
+    # nums = [0,0,3] 
+    # queries = [[0,2],[1,1],[0,0],[0,0]]
+    ret = Solution().maxRemoval1(nums, queries)
     print(ret)
