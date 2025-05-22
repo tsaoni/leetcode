@@ -22,8 +22,39 @@ class Solution:
         return True
     
     def minZeroArray(self, nums: List[int], queries: List[List[int]]) -> int:
+        def isZeroArray(nums: List[int], queries: List[List[int]]) -> bool:
+            N = len(nums) 
+            lbuf, rbuf = [0] * N, [0] * N
+            for l, r, v in queries: 
+                lbuf[l] += v 
+                rbuf[r] += v
+            
+            def acc_from_right(l): 
+                for i in range(len(l) - 2, -1, -1): 
+                    l[i] += l[i + 1]
+            acc_from_right(lbuf)
+            lbuf = lbuf[1:] + [0]
+            acc_from_right(rbuf)
+            # print(lbuf, rbuf)
+
+            for n, lb, rb in zip(nums, lbuf, rbuf): 
+                if n > (rb - lb): 
+                    return False
+            return True
         
-        return -1 
+        # print(isZeroArray(nums, queries[: 4]))
+        if not isZeroArray(nums, queries): 
+            return -1
+        l, r = 0, len(queries)  
+        while l < r: 
+            mid = (l + r) // 2 
+            tmp = isZeroArray(nums, queries[: mid])
+            if tmp:
+                r = mid 
+            else: 
+                l = mid + 1
+       
+        return l
 
     def maxRemoval(self, nums: List[int], queries: List[List[int]]) -> int:
         """
@@ -103,5 +134,12 @@ if __name__ == "__main__":
     queries = [[0,3]]
     # nums = [0,0,3] 
     # queries = [[0,2],[1,1],[0,0],[0,0]]
-    ret = Solution().maxRemoval1(nums, queries)
+    # ret = Solution().maxRemoval1(nums, queries)
+    # print(ret)
+
+    nums = [2,0,2]
+    queries = [[0,2,1],[0,2,1],[1,1,3]]
+    nums = [7,6,8] 
+    queries = [[0,0,2],[0,1,5],[2,2,5],[0,2,4]]
+    ret = Solution().minZeroArray(nums, queries)
     print(ret)
