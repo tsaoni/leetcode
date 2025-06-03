@@ -36,8 +36,29 @@ class Solution:
         return False
 
     def minAbsDiff(self, grid: List[List[int]], k: int) -> List[List[int]]:
+        m, n = len(grid), len(grid[0])
+        ret = [[-1] * (n - k + 1) for _ in range(m - k + 1)]
+        for i in range(m - k + 1): 
+            for j in range(n - k + 1): 
+                arr = set()
+                for ik in range(i, i + k): 
+                    for jk in range(j, j + k): 
+                        arr.add(grid[ik][jk])
+                arr = list(arr)
+                arr.sort()
+                if len(arr) == 1: 
+                    ret[i][j] = 0 
+                else:
+                    tmp = ret[i][j]
+                    for idx in range(1, len(arr)): 
+                        tmp = min(tmp, arr[idx] - arr[idx - 1]) if tmp >= 0 else arr[idx] - arr[idx - 1]
+                    ret[i][j] = tmp 
+
+        return ret
+
+    def minMoves(self, classroom: List[str], energy: int) -> int:
         
-        return [[]]
+        return 0
 
 if __name__ == "__main__": 
     nums = [3,1,6,8,4]
@@ -46,5 +67,14 @@ if __name__ == "__main__":
     # target = 15
     # nums = [20,14,18,15,7,12]
     # target = 2520
-    ret = Solution().checkEqualPartitions(nums, target)
+    # ret = Solution().checkEqualPartitions(nums, target)
+    # print(ret)
+
+    grid = [[1,8],[3,-2]]
+    k = 2
+    # grid = [[3,-1]]
+    # k = 1
+    grid = [[1,-2,3],[2,3,5]]
+    k = 2
+    ret = Solution().minAbsDiff(grid, k)
     print(ret)
