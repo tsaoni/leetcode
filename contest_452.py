@@ -57,8 +57,22 @@ class Solution:
         return ret
 
     def minMoves(self, classroom: List[str], energy: int) -> int:
-        
-        return 0
+        n, m = len(classroom), len(classroom[0])
+        labels = {}
+        for i in range(n): 
+            for j in range(m): 
+                if classroom[i][j] == "L": 
+                    labels[i, j] = len(labels) 
+                if classroom[i][j] == "S": 
+                    start = (i, j)
+
+        L = len(labels)
+        bestEnergy = [[[0] * L for _ in range(m)] for _ in range(n)]
+        step = 0
+        states = [(*start, [0] * L, energy, step)]
+
+
+        return step
 
 if __name__ == "__main__": 
     nums = [3,1,6,8,4]
