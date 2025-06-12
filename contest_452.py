@@ -70,7 +70,8 @@ class Solution:
         bestEnergy = [[[0] * L for _ in range(m)] for _ in range(n)]
         step = 0
         states = [(*start, [0] * L, energy, step)]
-
+        while len(states) > 0: 
+            states
 
         return step
 
