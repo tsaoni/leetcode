@@ -30,7 +30,9 @@ class Solution:
         return ret
 
     def maxProfit(self, n: int, present: List[int], future: List[int], hierarchy: List[List[int]], budget: int) -> int:
-        
+        """
+        wrong implementation
+        """
         # max_cost = sum([f - p // 2 for f, p in zip(future, present)])
         dp = [[[0, 0], *[[None, None] for _ in range(budget)]] for _ in range(n)]
         T = [[] for _ in range(n)]
@@ -71,6 +73,27 @@ class Solution:
             return 
         print(dp[2])
         return ret
+
+    def maxProfit1(self, n: int, present: List[int], future: List[int], hierarchy: List[List[int]], budget: int) -> int:
+        """
+        use tree DP
+        """
+        T = [[] for _ in range(n)]
+        for b, e in hierarchy: 
+            T[b - 1].append(e - 1)
+        dp = [[[0, 0] for _ in range(budget + 1)] for _ in range(n)]
+        def dfs(boss, prev): 
+            for epr in T[boss]: 
+                prev = dfs(epr, prev)
+
+                dp[prev]
+                prev = epr 
+
+                
+            return boss
+        
+        dfs(0, -1)
+        return 0
 
 if __name__ == "__main__": 
     s = "adcb"

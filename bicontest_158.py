@@ -19,6 +19,9 @@ class Solution:
         return sum(l)
 
     def maximumProfit(self, prices: List[int], k: int) -> int:
+        """
+        results in TLE
+        """
         dp = [[0] * len(prices) for _ in range(k)]
         min_idx, max_idx = 0, 0
         for i in range(1, len(prices)): 
@@ -40,6 +43,33 @@ class Solution:
                     dp[i][j] = max(dp[i][j], dp[i - 1][m] + prices[max_idx] - prices[min_idx])
               
         return dp[k - 1][len(prices) - 1]
+
+    def maximumProfit1(self, prices: List[int], k: int) -> int:
+        profits = [[0, -float("inf"), -float("inf")]] + [[-float("inf")] * 3 for _ in range(k)]
+        # three states: 0: ignore, 1: buy before, 2: sell before
+        for p in prices: 
+            _profits = [[0, -p, p]] + [[-float("inf")] * 3 for _ in range(k)]
+            for i in range(k + 1): 
+                # ignore
+                # for state in range(3):
+                #     _profits[i][state] = max(_profits[i][state], profits[i][state])
+                if i < k:
+                    _profits[i + 1][0] = max(_profits[i + 1][0], profits[i][2] - p, profits[i + 1][0])
+                    _profits[i + 1][0] = max(_profits[i + 1][0], profits[i][1] + p, profits[i + 1][0]) 
+            
+                # buy
+                _profits[i][1] = max(profits[i][1], profits[i][0] - p) \
+                    if profits[i][1] is not None else profits[i][0] - p
+
+                # sell 
+                _profits[i][2] = max(profits[i][2], profits[i][0] + p) \
+                    if profits[i][2] is not None else profits[i][0] + p 
+                
+            profits = _profits
+            # print(profits)
+        
+        # print(profits)
+        return max([x[0] for x in profits])
 
     def maxGCDScore(self, nums: List[int], k: int) -> int:
         
