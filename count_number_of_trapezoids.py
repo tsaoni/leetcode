@@ -21,6 +21,10 @@ class Solution:
         return ret 
     
     def countTrapezoids_2(self, points: List[List[int]]) -> int:
+        
+        return 0 
+
+    def _countTrapezoids_2(self, points: List[List[int]]) -> int:
         ht = {}
         tries = {}
         N = len(points)
