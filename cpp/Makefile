@@ -8,7 +8,7 @@ test: $(OBJECTS)
 	g++ $< -o $@ 
 
 test.o: $(I).cpp 
-	g++ -c $< -o $@ 
+	g++ -std=c++11 -c $< -o $@ 
 
 clean: 
 	rm -rf *.o test
